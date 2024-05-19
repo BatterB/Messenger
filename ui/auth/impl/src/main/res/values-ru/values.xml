@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name= "auth_screen_email_placeholder">Почта</string>
+    <string name= "auth_screen_password_placeholder">Пароль</string>
+    <string name= "auth_screen_login_button_title">Войти</string>
+    <string name="auth_screen_overline_qr_auth">Или войдите с помощью</string>
+    <string name="auth_screen_label_qr_auth">Отсканировать QR код</string>
+    <string name="qr_screen_qr_scanner_header">QR код сканнер</string>
+</resources>
