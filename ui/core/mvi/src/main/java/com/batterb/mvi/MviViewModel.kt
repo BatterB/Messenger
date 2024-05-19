@@ -1,7 +1,5 @@
 package com.batterb.mvi
 
-package sportlevel.scout3.core_mvi
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel

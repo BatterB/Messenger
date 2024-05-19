@@ -7,14 +7,21 @@ pluginManagement {
                 includeGroupByRegex("androidx.*")
             }
         }
+        mavenLocal()
         mavenCentral()
         gradlePluginPortal()
     }
+    plugins {
+        kotlin("jvm") version "1.9.23"
+    }
+}
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "0.5.0"
 }
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
+        mavenLocal()
         mavenCentral()
     }
 }
@@ -31,7 +38,21 @@ fun includeModule(moduleName: String) {
 
 rootProject.name = "Messenger"
 include(":app")
+
 include(":core:common")
-include(":ui:core:mvi")
 include(":data:core:common")
+
 include(":domain:core:common")
+includeModule(":domain:auth")
+
+
+include(":ui:core:common")
+include(":ui:core:mvi")
+include(":ui:core:navigation")
+
+includeModule(":ui:auth")
+includeModule(":ui:splash")
+
+
+
+
