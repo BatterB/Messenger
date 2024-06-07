@@ -26,11 +26,15 @@ import com.batterb.ui.auth.impl.util.QrCodeAnalyzer
 fun QrScanner(
     dispatchAction: (action: AuthorizationAction) -> Unit = {}
 ) {
+    println("1")
     val context = LocalContext.current
+    println("2")
     val lifecycleOwner = LocalLifecycleOwner.current
+    println("3")
     val cameraProviderFuture = remember {
         ProcessCameraProvider.getInstance(context)
     }
+    println("4")
     var hasCameraPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(
@@ -39,16 +43,18 @@ fun QrScanner(
             ) == PackageManager.PERMISSION_GRANTED
         )
     }
+    println("5")
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { isGranted ->
             hasCameraPermission = isGranted
         }
     )
-
+    println("6")
     LaunchedEffect(key1 = true) {
         launcher.launch(Manifest.permission.CAMERA)
     }
+    println("7")
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {

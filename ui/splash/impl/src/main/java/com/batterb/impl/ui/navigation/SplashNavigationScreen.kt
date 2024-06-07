@@ -1,18 +1,21 @@
 package com.batterb.impl.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import cafe.adriel.voyager.hilt.getViewModel
 import com.batterb.impl.ui.SplashScreen
 import com.batterb.impl.ui.SplashViewModel
+import com.batterb.ui.auth.api.AuthScreen
 import com.batterb.ui.core.common.ext.getScreen
+import com.batterb.ui.main.api.MainPage
 
 class SplashNavigationScreen : Screen {
     @Composable
     override fun Content() {
-        val splashViewModel: SplashViewModel = getViewModel()
+        val splashViewModel: SplashViewModel = hiltViewModel()
         val navigator = LocalNavigator.currentOrThrow
 
         SplashScreen(
@@ -20,10 +23,10 @@ class SplashNavigationScreen : Screen {
             dispatchAction = splashViewModel::dispatchAction,
             navigateNext = { hasLoggedUser ->
 
-                val preparedDestination = if (hasLoggedUser) {
-                    Destination.MainPage
+                val preparedDestination = if (!hasLoggedUser) {
+                    AuthScreen
                 } else {
-                    Destination.AuthScreen
+                    MainPage
                 }
 
                 navigator.replaceAll(preparedDestination.getScreen())

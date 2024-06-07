@@ -31,6 +31,11 @@ android {
 
     buildFeatures {
         buildConfig = true
+        compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.13"
     }
 
     buildTypes {
@@ -63,6 +68,7 @@ android {
 dependencies {
     implementation(libs.bundles.common)
     implementation(libs.bundles.ui.common)
+    implementation(libs.androidx.datastore)
 
     ksp(libs.dagger.hilt.compiler)
 

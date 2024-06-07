@@ -21,6 +21,7 @@ dependencies {
     implementation(libs.hilt.gradle.plugin)
     implementation(libs.ksp.gradle.plugin)
     implementation(libs.application.gradle.plugin)
+    implementation(libs.kotlin.serialization.plugin)
 
     implementation(files(libs.javaClass.superclass.protectionDomain.codeSource.location))
 }

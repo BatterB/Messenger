@@ -49,4 +49,5 @@ dependencies {
     implementation(libs.bundles.common)
     implementation(libs.bundles.ui.common)
     implementation(project(":ui:core:mvi"))
+    implementation(project(":ui:core:common"))
 }

@@ -2,6 +2,9 @@ package com.batterb.ui.auth.impl.mvi
 
 import android.content.Context
 import androidx.lifecycle.viewModelScope
+import com.batterb.common.ActionResult
+import com.batterb.domain.auth.api.IAuthUC
+import com.batterb.domain.user.api.ISaveUserUC
 import com.batterb.mvi.MviViewModel
 import com.batterb.ui.auth.impl.mvi.contracts.AuthorizationAction
 import com.batterb.ui.auth.impl.mvi.contracts.AuthorizationCommand
@@ -10,6 +13,8 @@ import com.batterb.ui.auth.impl.mvi.contracts.AuthorizationState
 import com.batterb.ui.core.common.ext.asVO
 import com.batterb.ui.core.common.vo.IStringVO
 import com.batterb.ui.core.common.vo.Plain
+import com.batterb.user.impl.UserRepository
+import com.batterb.user.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -18,9 +23,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 
 @HiltViewModel
 class AuthorizationViewModel @Inject constructor(
-    //private val repository: AuthorizationRepository,
-    //private val userRepository: UserRepository,
-    //private val userFactory: UserFactory,
+    private val authUC: IAuthUC,
+    private val saveUserUC: ISaveUserUC,
     @ApplicationContext private val appContext: Context
 ) : MviViewModel<AuthorizationState, AuthorizationSideEffect, AuthorizationAction, AuthorizationCommand>(
     AuthorizationState.Default()
@@ -36,21 +40,27 @@ class AuthorizationViewModel @Inject constructor(
                     handleCommand(AuthorizationCommand.MarkErrorFields)
                 }
             }
+
             is AuthorizationAction.UpdateLoginField -> {
                 handleCommand(AuthorizationCommand.UpdateLoginField(action.username))
             }
+
             is AuthorizationAction.UpdatePasswordField -> {
                 handleCommand(AuthorizationCommand.UpdatePasswordField(action.password))
             }
+
             AuthorizationAction.ShowQrScanner -> {
                 handleCommand(AuthorizationCommand.ShowQrScanner)
             }
+
             is AuthorizationAction.QrCodeLogin -> {
                 qrLoginRequest(action.data)
             }
+
             AuthorizationAction.CancelQrScan -> {
                 handleCommand(AuthorizationCommand.ShowMainScreen)
             }
+
             is AuthorizationAction.ChangePasswordVisibility -> {
                 handleCommand(AuthorizationCommand.SetPasswordVisibility(!action.passwordVisibility))
             }
@@ -59,33 +69,35 @@ class AuthorizationViewModel @Inject constructor(
 
     private fun authRequest(username: String, password: String) {
         if (!username.trim().isEmailValid()) {
-            throw Throwable("Incorrevt password")
+            throw Throwable("Incorrect password")
         }
 
-//        repository.authorize(username, password)
-//            .onEach { result ->
-//                when (result) {
-//                    is ActionResult.Loading -> {
-//                        handleCommand(AuthorizationCommand.Loading(result.message))
-//                    }
-//                    is ActionResult.Success -> {
-//                        userRepository.saveUser(
-//                            user = userFactory.create(
-//                                login = username.trim(),
-//                                password = password.trim(),
-//                                token = result.data,
-//                                role = UserRole.SCOUT
-//                            )
-//                        )
-//                        handleCommand(AuthorizationCommand.GoToChats)
-//                    }
-//                    is ActionResult.Error -> {
-//                        handleCommand(AuthorizationCommand.MarkErrorFields)
-//                        handleCommand(AuthorizationCommand.ShowErrorSnackbar(result.error.extractScoutError()))
-//                    }
-//                }
-//            }
-//            .launchIn(viewModelScope)
+        authUC(username, password)
+            .onEach { result ->
+                when (result) {
+                    is ActionResult.Loading -> {
+                        handleCommand(AuthorizationCommand.Loading(result.message?.asVO()))
+                    }
+
+                    is ActionResult.Success -> {
+                        saveUserUC(
+                            User(
+                                login = username.trim(),
+                                password = password.trim(),
+                                token = result.data,
+                                id = username.trim()
+                            )
+                        )
+                        handleCommand(AuthorizationCommand.GoToChats)
+                    }
+
+                    is ActionResult.Error -> {
+                        handleCommand(AuthorizationCommand.MarkErrorFields)
+                        handleCommand(AuthorizationCommand.ShowErrorSnackbar(result.error.message?.asVO() ?: IStringVO.Plain("Error")))
+                    }
+                }
+            }
+            .launchIn(viewModelScope)
     }
 
     private fun qrLoginRequest(loginData: String) {
@@ -131,7 +143,7 @@ class AuthorizationViewModel @Inject constructor(
             )
 
             is AuthorizationCommand.SetPasswordVisibility -> ReduceResult.UpdateState(
-                onSetPasswordVisibility(state,command.passwordVisibility)
+                onSetPasswordVisibility(state, command.passwordVisibility)
             )
 
             AuthorizationCommand.ShowQrScanner -> ReduceResult.UpdateState(
@@ -153,28 +165,37 @@ class AuthorizationViewModel @Inject constructor(
         }
     }
 
-    private fun onUpdateLoginField(state: AuthorizationState, username: String): AuthorizationState {
+    private fun onUpdateLoginField(
+        state: AuthorizationState,
+        username: String
+    ): AuthorizationState {
         return when (state) {
             is AuthorizationState.Default -> state.copy(username = username.asVO())
             else -> AuthorizationState.Default(username = username.asVO())
         }
     }
 
-    private fun onUpdatePasswordField(state: AuthorizationState, password: String): AuthorizationState{
+    private fun onUpdatePasswordField(
+        state: AuthorizationState,
+        password: String
+    ): AuthorizationState {
         return when (state) {
             is AuthorizationState.Default -> state.copy(password = password.asVO())
             else -> AuthorizationState.Default(password = password.asVO())
         }
     }
 
-    private fun onSetPasswordVisibility(state: AuthorizationState, passwordVisibility: Boolean) : AuthorizationState{
+    private fun onSetPasswordVisibility(
+        state: AuthorizationState,
+        passwordVisibility: Boolean
+    ): AuthorizationState {
         return when (state) {
             is AuthorizationState.Default -> state.copy(isPasswordVisible = passwordVisibility)
             else -> AuthorizationState.Default(isPasswordVisible = passwordVisibility)
         }
     }
 
-    private fun onMarkErrorFields(state: AuthorizationState) : AuthorizationState{
+    private fun onMarkErrorFields(state: AuthorizationState): AuthorizationState {
         return when (state) {
             is AuthorizationState.Default -> state.copy(loginError = true)
             else -> AuthorizationState.Default(loginError = true)

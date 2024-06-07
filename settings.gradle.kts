@@ -56,3 +56,17 @@ includeModule(":ui:splash")
 
 
 
+include(":ui:auth:api")
+include(":ui:mainpage:api")
+include(":ui:mainpage:impl")
+include(":data:user:impl")
+include(":data:user:api")
+include(":domain:user:model")
+include(":ui:chat:api")
+include(":ui:chat:impl")
+include(":domain:user:impl")
+include(":domain:user:api")
+include(":data:auth:api")
+include(":data:auth:impl")
+include(":domain:auth:api")
+include(":domain:auth:impl")
